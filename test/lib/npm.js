@@ -786,3 +786,11 @@ t.test('usage', async t => {
     }
   })
 })
+
+t.test('uppercase NPM_CONFIG_* envs do not leak into tests', async t => {
+  const leaked = join(t.testdirName, 'leaked.npmrc')
+  mockGlobals(t, { 'process.env.NPM_CONFIG_USERCONFIG': leaked })
+  const { npm } = await loadMockNpm(t)
+  t.not(npm.config.get('userconfig'), leaked, 'userconfig env is cleared')
+  t.equal(process.env.NPM_CONFIG_USERCONFIG, undefined, 'env var is unset during test')
+})
