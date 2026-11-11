@@ -152,7 +152,10 @@ const setupMockNpm = async (t, {
 
   // These are globals manipulated by npm itself that we need to reset to their
   // original values between tests
-  const npmEnvs = Object.keys(process.env).filter(k => k.startsWith('npm_'))
+  // npm reads npm_config_* envs case-insensitively (eg NPM_CONFIG_USERCONFIG),
+  // so those must be cleared regardless of case or they leak into tests
+  const npmEnvs = Object.keys(process.env)
+    .filter(k => k.startsWith('npm_') || /^npm_config_/i.test(k))
   mockGlobals(t, {
     process: {
       title: process.title,
